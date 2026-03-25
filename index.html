@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T.H.I.N.K. Before You Post</title>
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --success: #2ECC71;
+            --danger: #E74C3C;
+            --dark: #333333;
+            --light: #F5F7FA;
+            --white: #FFFFFF;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            background-color: var(--white);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        .header {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        .score {
+            font-weight: bold;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+        .content {
+            padding: 20px;
+        }
+        .draft-box {
+            background-color: #E9ECEF;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: var(--dark);
+            min-height: 80px;
+            border-left: 5px solid var(--primary);
+        }
+        .think-checklist {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        .think-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #666;
+            cursor: pointer;
+        }
+        .think-item input {
+            margin-bottom: 5px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--white);
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .btn-post {
+            background-color: var(--success);
+        }
+        .btn-delete {
+            background-color: var(--danger);
+        }
+        /* Feedback Modal */
+        .feedback-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .feedback-overlay.show {
+            transform: translateY(0);
+        }
+        .feedback-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .feedback-text {
+            margin-bottom: 25px;
+            color: var(--dark);
+            line-height: 1.5;
+        }
+        .btn-next {
+            background-color: var(--primary);
+            padding: 12px 30px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <h1>T.H.I.N.K. Before You Post</h1>
+        <div class="score">Score: <span id="score-display">0</span> / 5</div>
+    </div>
+    
+    <div class="content" id="game-content">
+        <p style="text-align: center; color: #666; font-size: 0.9rem; margin-top:0;">Scenario <span id="scenario-number">1</span> of 5</p>
+        <div class="draft-box" id="draft-text">
+            Loading scenario...
+        </div>
+        
+        <p style="text-align: center; font-size: 0.85rem; color: #888; margin-bottom: 10px;">Use the checklist to help you decide:</p>
+        <div class="think-checklist">
+            <label class="think-item"><input type="checkbox" class="think-cb"> True</label>
+            <label class="think-item"><input type="checkbox" class="think-cb"> Helpful</label>
+            <label class="think-item"><input type="checkbox" class="think-cb"> Inspiring</label>
+            <label class="think-item"><input type="checkbox" class="think-cb"> Necessary</label>
+            <label class="think-item"><input type="checkbox" class="think-cb"> Kind</label>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-delete" onclick="submitAnswer('delete')">🗑️ Delete It</button>
+            <button class="btn-post" onclick="submitAnswer('post')">✉️ Post It</button>
+        </div>
+    </div>
+
+    <div class="feedback-overlay" id="feedback-overlay">
+        <div class="feedback-title" id="feedback-title">Result</div>
+        <div class="feedback-text" id="feedback-text">Explanation goes here.</div>
+        <button class="btn-next" id="btn-next" onclick="nextScenario()">Next Scenario</button>
+    </div>
+</div>
+
+<script>
+    const scenarios = [
+        {
+            text: "Did you hear that Alex failed the math test? He is so dumb!",
+            correctAction: "delete",
+            explanation: "This is a rumor and it's mean. It completely fails the T.H.I.N.K. test. You should never spread negativity or embarrass someone online."
+        },
+        {
+            text: "Your painting looks amazing! The colors are so bright. Great job!",
+            correctAction: "post",
+            explanation: "This is a great, uplifting comment! It is True, Helpful, Inspiring, Necessary, and Kind."
+        },
+        {
+            text: "Why are you even trying out for the team? You run so slow.",
+            correctAction: "delete",
+            explanation: "This is hurtful and discouraging. It is definitely not Necessary or Kind. If you can't be supportive, it's best to say nothing at all."
+        },
+        {
+            text: "Hey, I saw you were upset earlier. Just wanted to say I am here if you need to talk.",
+            correctAction: "post",
+            explanation: "Reaching out to help a friend in need is Helpful, Necessary, and Kind. This is a perfect example of being a good digital citizen."
+        },
+        {
+            text: "If everyone leaves a negative review on the rival school's page, they might get banned. Let's do it!",
+            correctAction: "delete",
+            explanation: "Organizing a group to harass or 'review-bomb' someone else is a form of cyberbullying. It fails the T.H.I.N.K. test entirely."
+        }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const draftText = document.getElementById('draft-text');
+    const scenarioNumber = document.getElementById('scenario-number');
+    const scoreDisplay = document.getElementById('score-display');
+    const feedbackOverlay = document.getElementById('feedback-overlay');
+    const feedbackTitle = document.getElementById('feedback-title');
+    const feedbackText = document.getElementById('feedback-text');
+    const btnNext = document.getElementById('btn-next');
+    const checkboxes = document.querySelectorAll('.think-cb');
+
+    function loadScenario() {
+        if (currentQuestion < scenarios.length) {
+            draftText.innerText = scenarios[currentQuestion].text;
+            scenarioNumber.innerText = currentQuestion + 1;
+            // Uncheck all checkboxes for the new round
+            checkboxes.forEach(cb => cb.checked = false);
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function submitAnswer(action) {
+        const currentData = scenarios[currentQuestion];
+        const isCorrect = (action === currentData.correctAction);
+
+        if (isCorrect) {
+            score++;
+            scoreDisplay.innerText = score;
+            feedbackTitle.innerText = "🌟 Great Job!";
+            feedbackTitle.style.color = "var(--success)";
+        } else {
+            feedbackTitle.innerText = "⚠️ Whoops!";
+            feedbackTitle.style.color = "var(--danger)";
+        }
+
+        feedbackText.innerText = currentData.explanation;
+        feedbackOverlay.classList.add('show');
+    }
+
+    function nextScenario() {
+        feedbackOverlay.classList.remove('show');
+        currentQuestion++;
+        setTimeout(loadScenario, 300); // Wait for animation to slide down
+    }
+
+    function showEndScreen() {
+        document.getElementById('game-content').innerHTML = `
+            <div style="text-align: center; padding: 20px 0;">
+                <h2 style="color: var(--primary);">Game Over!</h2>
+                <p style="font-size: 1.2rem;">Your final score is <strong>${score} / 5</strong>.</p>
+                <p style="color: #666; margin-bottom: 30px;">Remember to always use the T.H.I.N.K. method before you hit send!</p>
+                <button class="btn-next" onclick="location.reload()">🔄 Play Again</button>
+            </div>
+        `;
+    }
+
+    // Initialize the game
+    loadScenario();
+</script>
+
+</body>
+</html>
