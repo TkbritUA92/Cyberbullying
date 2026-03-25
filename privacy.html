@@ -1,0 +1,298 @@
+Yes, absolutely! That is actually a much smarter and cleaner way to do it. You can host as many web pages as you want inside a single GitHub repository.
+
+Since my last message got slightly cut off at the very end of the code, I have provided the complete, finished code for the Privacy game below.
+
+Here is exactly how to add this second game to your existing cyberbullying repository and get the link for ThingLink.
+
+Phase 1: Save the New File
+Copy the full HTML code provided below.
+
+Open your text editor again (Notepad/TextEdit).
+
+Paste the code and save this new file to your desktop as privacy.html (make sure it's not named index.html this time!).
+
+Phase 2: Upload to Your Existing Repo
+Go to GitHub and open your existing cyberbullying repository.
+
+Near the top right of the file list, click the Add file button, then select Upload files.
+
+Drag and drop your new privacy.html file into the box.
+
+Scroll down and click the green Commit changes button.
+
+Phase 3: Get Your ThingLink URL
+Because you already turned on GitHub Pages for this repository, your new game is instantly live! You don't need to change any settings.
+
+Your first game (Cyberbullying) is living at: https://[your-username].github.io/cyberbullying/
+
+Your new game (Privacy) is now living at: https://[your-username].github.io/cyberbullying/privacy.html
+
+Just copy that second URL and paste it into the "Add content from website" tag on your Privacy slide in ThingLink!
+
+The Complete "Footprint Defender" Code
+(Copy everything below this line)
+
+HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footprint Defender</title>
+    <style>
+        :root {
+            --primary: #6C5CE7;
+            --secondary: #00CEC9;
+            --danger: #FF7675;
+            --dark: #2D3436;
+            --light: #DFE6E9;
+            --white: #FFFFFF;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            background-color: var(--white);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            position: relative;
+        }
+        .header {
+            background-color: var(--dark);
+            color: var(--secondary);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--white);
+        }
+        .score {
+            font-weight: bold;
+            margin-top: 5px;
+            font-size: 1rem;
+        }
+        .content {
+            padding: 25px 20px;
+        }
+        .type-badge {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .scanner-box {
+            background-color: #F8F9FA;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            color: var(--dark);
+            min-height: 100px;
+            border: 2px dashed var(--primary);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: var(--white);
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        .btn-private {
+            background-color: var(--primary);
+        }
+        .btn-public {
+            background-color: var(--secondary);
+            color: var(--dark);
+        }
+        
+        /* Feedback Modal */
+        .feedback-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.98);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .feedback-overlay.show {
+            transform: translateY(0);
+        }
+        .feedback-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .feedback-text {
+            margin-bottom: 30px;
+            color: var(--dark);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .btn-next {
+            background-color: var(--dark);
+            padding: 15px 35px;
+            width: auto;
+            color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <h1>Footprint Defender</h1>
+        <div class="score">Privacy Score: <span id="score-display">0</span> / 5</div>
+    </div>
+    
+    <div class="content" id="game-content">
+        <p style="text-align: center; color: #888; font-size: 0.95rem; margin-top:0;">Scenario <span id="scenario-number">1</span> of 5</p>
+        
+        <div class="scanner-box" id="draft-text">
+            <span class="type-badge" id="type-badge">Loading...</span><br/>
+            Loading scenario...
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-private" onclick="submitAnswer('private')">🔒 Keep Private / Deny</button>
+            <button class="btn-public" onclick="submitAnswer('public')">🌍 Share Publicly / Allow</button>
+        </div>
+    </div>
+
+    <div class="feedback-overlay" id="feedback-overlay">
+        <div class="feedback-title" id="feedback-title">Result</div>
+        <div class="feedback-text" id="feedback-text">Explanation goes here.</div>
+        <button class="btn-next" id="btn-next" onclick="nextScenario()">Next Scenario</button>
+    </div>
+</div>
+
+<script>
+    const scenarios = [
+        {
+            type: "Social Media Post",
+            text: "So excited for the concert! Here are my VIP tickets! 🎟️ [Barcode Visible]",
+            correctAction: "private",
+            explanation: "Never post barcodes! Scammers can copy them, print them out, and steal your seats before you even arrive."
+        },
+        {
+            type: "App Permission",
+            text: "Allow 'SnapGram' to access your precise location at all times?",
+            correctAction: "private",
+            explanation: "Always turn off precise location sharing on your social media apps so strangers cannot track your daily routines and know where you are."
+        },
+        {
+            type: "Social Media Post",
+            text: "My teacher Mr. Smith is literally the worst. I'm going to fail his class on purpose. 😡",
+            correctAction: "private",
+            explanation: "Remember your permanent digital footprint! Venting is natural, but doing it online means future employers, colleges, or other teachers might see this rant."
+        },
+        {
+            type: "Profile Setting",
+            text: "Default Account Privacy: Who can see your photos and profile?",
+            correctAction: "private",
+            explanation: "Setting your accounts to 'Private' or 'Friends Only' gives you complete control over who gets to see your life and interact with your footprint."
+        },
+        {
+            type: "Social Media Post",
+            text: "First place at the science fair! So proud of our team's hard work! 🏆🔬",
+            correctAction: "public",
+            explanation: "This is a great, safe post! It builds a positive digital footprint and doesn't reveal any sensitive personal information or locations."
+        }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const draftText = document.getElementById('draft-text');
+    const typeBadge = document.getElementById('type-badge');
+    const scenarioNumber = document.getElementById('scenario-number');
+    const scoreDisplay = document.getElementById('score-display');
+    const feedbackOverlay = document.getElementById('feedback-overlay');
+    const feedbackTitle = document.getElementById('feedback-title');
+    const feedbackText = document.getElementById('feedback-text');
+
+    function loadScenario() {
+        if (currentQuestion < scenarios.length) {
+            typeBadge.innerText = scenarios[currentQuestion].type;
+            draftText.innerHTML = `<span class="type-badge">${scenarios[currentQuestion].type}</span><br/><br/>${scenarios[currentQuestion].text}`;
+            scenarioNumber.innerText = currentQuestion + 1;
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function submitAnswer(action) {
+        const currentData = scenarios[currentQuestion];
+        const isCorrect = (action === currentData.correctAction);
+
+        if (isCorrect) {
+            score++;
+            scoreDisplay.innerText = score;
+            feedbackTitle.innerText = "✅ Safe Choice!";
+            feedbackTitle.style.color = "var(--secondary)"; // Teal
+        } else {
+            feedbackTitle.innerText = "⚠️ Privacy Risk!";
+            feedbackTitle.style.color = "var(--danger)"; // Red
+        }
+
+        feedbackText.innerText = currentData.explanation;
+        feedbackOverlay.classList.add('show');
+    }
+
+    function nextScenario() {
+        feedbackOverlay.classList.remove('show');
+        currentQuestion++;
+        setTimeout(loadScenario, 300); // Wait for animation to slide down
+    }
+
+    function showEndScreen() {
+        document.getElementById('game-content').innerHTML = `
+            <div style="text-align: center; padding: 20px 0;">
+                <h2 style="color: var(--primary);">Audit Complete!</h2>
+                <p style="font-size: 1.2rem;">Your Privacy Score is <strong>${score} / 5</strong>.</p>
+                <p style="color: #666; margin-bottom: 30px;">Always think about your permanent digital footprint before you hit share!</p>
+                <button class="btn-next" onclick="location.reload()">🔄 Play Again</button>
+            </div>
+        `;
+    }
+
+    // Initialize the game
+    loadScenario();
+</script>
+
+</body>
+</html>
