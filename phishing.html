@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spot the Phish</title>
+    <style>
+        :root {
+            --primary: #F39C12; /* Orange */
+            --secondary: #2C3E50; /* Navy Blue */
+            --success: #27AE60; /* Green */
+            --danger: #E74C3C; /* Red */
+            --light: #FDFEFE;
+            --white: #FFFFFF;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ECF0F1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            background-color: var(--white);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            position: relative;
+        }
+        .header {
+            background-color: var(--secondary);
+            color: var(--white);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 5px solid var(--primary);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+        .score {
+            font-weight: bold;
+            margin-top: 5px;
+            font-size: 1rem;
+            color: #BDC3C7;
+        }
+        .content {
+            padding: 25px 20px;
+        }
+        .message-box {
+            background-color: var(--light);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 1.05rem;
+            color: #333;
+            min-height: 120px;
+            border: 1px solid #BDC3C7;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .sender-info {
+            font-size: 0.85rem;
+            color: #7F8C8D;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #EEE;
+        }
+        .sender-info strong {
+            color: var(--secondary);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 15px 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--white);
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        .btn-phish {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+        .btn-legit {
+            background-color: var(--secondary);
+        }
+        
+        /* Feedback Modal */
+        .feedback-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.98);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .feedback-overlay.show {
+            transform: translateY(0);
+        }
+        .feedback-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .feedback-text {
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .btn-next {
+            background-color: var(--secondary);
+            padding: 15px 35px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <h1>Spot the Phish! 🎣</h1>
+        <div class="score">Catch Rate: <span id="score-display">0</span> / 5</div>
+    </div>
+    
+    <div class="content" id="game-content">
+        <p style="text-align: center; color: #7F8C8D; font-size: 0.95rem; margin-top:0;">Message <span id="scenario-number">1</span> of 5</p>
+        
+        <div class="message-box" id="draft-text">
+            <div class="sender-info" id="sender-info">Loading...</div>
+            <div id="message-body">Loading message...</div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-phish" onclick="submitAnswer('scam')">🚨 It's a Scam!</button>
+            <button class="btn-legit" onclick="submitAnswer('legit')">✅ Looks Legit</button>
+        </div>
+    </div>
+
+    <div class="feedback-overlay" id="feedback-overlay">
+        <div class="feedback-title" id="feedback-title">Result</div>
+        <div class="feedback-text" id="feedback-text">Explanation goes here.</div>
+        <button class="btn-next" id="btn-next" onclick="nextScenario()">Next Message</button>
+    </div>
+</div>
+
+<script>
+    const scenarios = [
+        {
+            sender: "netflix-support@free-movies-online.com",
+            type: "Email",
+            text: "URGENT: Your account will be suspended in 24 hours. Click here to update your billing info immediately.",
+            correctAction: "scam",
+            explanation: "Look at that email address! Netflix would never use '@free-movies-online.com'. Plus, the urgent, threatening language is a classic phishing red flag."
+        },
+        {
+            sender: "no-reply@classroom.google.com",
+            type: "Email",
+            text: "Hi there, your teacher Mrs. Davis has posted a new assignment: 'History Chapter 4 Essay'.",
+            correctAction: "legit",
+            explanation: "This is a legitimate notification. The email address is official ('@classroom.google.com') and it isn't asking you for passwords or money."
+        },
+        {
+            sender: "Unknown Number (555-0192)",
+            type: "Text Message",
+            text: "CONGRATS! You won a $500 Amazon gift card. Click this link http://bit.ly/claim-prize to claim it now!",
+            correctAction: "scam",
+            explanation: "This is a 'smishing' (SMS phishing) attempt. If it seems too good to be true, it is. Never click random links from unknown numbers."
+        },
+        {
+            sender: "security@chase-bank-alerts.com",
+            type: "Email",
+            text: "Security Alert: We noticed a new login. If this wasn't you, please reply directly to this email with your password to secure your account.",
+            correctAction: "scam",
+            explanation: "A real bank will NEVER ask you to reply with your password. The sender's email address is also a fake domain pretending to be the bank."
+        },
+        {
+            sender: "sarah.jones@yourschool.edu",
+            type: "Email",
+            text: "Hey! Here are the notes from today's science lab. See you tomorrow!",
+            correctAction: "legit",
+            explanation: "This is a safe message from a trusted friend/classmate using a real school email address."
+        }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const senderInfo = document.getElementById('sender-info');
+    const messageBody = document.getElementById('message-body');
+    const scenarioNumber = document.getElementById('scenario-number');
+    const scoreDisplay = document.getElementById('score-display');
+    const feedbackOverlay = document.getElementById('feedback-overlay');
+    const feedbackTitle = document.getElementById('feedback-title');
+    const feedbackText = document.getElementById('feedback-text');
+
+    function loadScenario() {
+        if (currentQuestion < scenarios.length) {
+            senderInfo.innerHTML = `<strong>From:</strong> ${scenarios[currentQuestion].sender} <br><strong>Type:</strong> ${scenarios[currentQuestion].type}`;
+            messageBody.innerText = scenarios[currentQuestion].text;
+            scenarioNumber.innerText = currentQuestion + 1;
+        } else {
+            showEndScreen();
+        }
+    }
+
+    function submitAnswer(action) {
+        const currentData = scenarios[currentQuestion];
+        const isCorrect = (action === currentData.correctAction);
+
+        if (isCorrect) {
+            score++;
+            scoreDisplay.innerText = score;
+            feedbackTitle.innerText = "🎯 Spot On!";
+            feedbackTitle.style.color = "var(--success)"; 
+        } else {
+            feedbackTitle.innerText = "💥 You Got Hooked!";
+            feedbackTitle.style.color = "var(--danger)"; 
+        }
+
+        feedbackText.innerText = currentData.explanation;
+        feedbackOverlay.classList.add('show');
+    }
+
+    function nextScenario() {
+        feedbackOverlay.classList.remove('show');
+        currentQuestion++;
+        setTimeout(loadScenario, 300); // Wait for animation to slide down
+    }
+
+    function showEndScreen() {
+        document.getElementById('game-content').innerHTML = `
+            <div style="text-align: center; padding: 20px 0;">
+                <h2 style="color: var(--primary);">Inbox Cleared!</h2>
+                <p style="font-size: 1.2rem;">Your Catch Rate: <strong>${score} / 5</strong>.</p>
+                <p style="color: #7F8C8D; margin-bottom: 30px;">Always pause and verify the sender before you click any links!</p>
+                <button class="btn-next" onclick="location.reload()">🔄 Play Again</button>
+            </div>
+        `;
+    }
+
+    // Initialize the game
+    loadScenario();
+</script>
+
+</body>
+</html>
